@@ -58,7 +58,7 @@ export const SignupPage = () => {
               label="Password"
               name="password"
               rules={[
-                { required: true, message: "Please enter your password" },
+                { required: true, message: "Please enter your password"},
               ]}
             >
               <Input placeholder="enter your password" />

@@ -1,8 +1,10 @@
 import { Button, Form, FormProps, Input } from "antd";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const LoginPage = () => {
+
+  const navigate = useNavigate();
   type FieldType = {
     email?: string;
     password?: string;
@@ -10,6 +12,7 @@ export const LoginPage = () => {
 
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     console.log("Success:", values);
+    navigate('/home');
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
