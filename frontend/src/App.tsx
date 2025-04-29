@@ -2,6 +2,7 @@ import { createBrowserRouter, Route, RouterProvider, Routes } from "react-router
 import "./App.css";
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
+import { HomePage } from "./pages/HomePage";
 
 function App() {
   //  const router = createBrowserRouter([
@@ -17,11 +18,12 @@ function App() {
   return (
     <>
    
-    <div className="font-display">
+    <div className="font-display h-screen">
 
       <Routes>
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/signup" element={<SignupPage/>}/>
+        <Route path="/home" element={<HomePage/>}/>
       </Routes> 
     {/* <RouterProvider router={router}/> */}
     {/* <LoginPage /> */}

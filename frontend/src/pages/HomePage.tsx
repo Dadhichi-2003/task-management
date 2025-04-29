@@ -1,7 +1,13 @@
-import React from 'react'
+import React from "react";
+import { Sidebar } from "../components/Sidebar";
 
 export const HomePage = () => {
   return (
-    <div>HomePage</div>
-  )
-}
+    <>
+    <div className="h-screen"> 
+    <Sidebar />
+    </div>
+     
+    </>
+  );
+};
