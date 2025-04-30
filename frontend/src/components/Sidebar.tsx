@@ -2,16 +2,24 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Layout, Menu, Popover, theme } from "antd";
+import { Avatar, Button, Empty, Layout, Menu, Popover, Switch, theme } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
 import { CgGoogleTasks } from "react-icons/cg";
 import { FaRegBell, FaTasks } from "react-icons/fa";
 import { SiGoogletasks } from "react-icons/si";
+import { TaskList } from "./userComp/TaskList";
+import { TaskStatus } from "./userComp/TaskStatus";
+import { PiUserListBold } from "react-icons/pi";
+import { LuListTodo } from "react-icons/lu";
+import { UserList } from "./adminComp/UserList";
+import { AssignTask } from "./adminComp/AssignTask";
 
 export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [selectedkey , setSelectedkey ] = useState("1");
+  const [isChecked , setIsChecked] = useState(false)
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -37,6 +45,27 @@ export const Sidebar = () => {
     },
   ]
   
+
+  const adminItems = [
+    {
+      key:"1",
+      icon: <PiUserListBold size={22} />,
+      label : "User List",
+    },
+
+    {
+      key:"2",
+      icon:<LuListTodo size={22}/>,
+      label:"Assign Task"
+    }
+  ]  
+
+  
+  const handleUserRole = (checked:boolean) => {
+    setIsChecked(checked);
+    setSelectedkey("1"); 
+  }
+
   
   return (
     <>
@@ -53,8 +82,9 @@ export const Sidebar = () => {
             
             theme="dark"
             mode="inline"
-            defaultSelectedKeys={["1"]}
-            items={items}
+            selectedKeys={[selectedkey]}
+            items={isChecked ? adminItems : items}
+            onClick={({key})=>{setSelectedkey(key)}}
           />
         </Sider>
         <Layout>
@@ -71,6 +101,7 @@ export const Sidebar = () => {
                 }}
               />
               <div className="flex justify-center  items-center gap-6 mr-5">
+                <Switch checkedChildren="Admin" unCheckedChildren="user" checked={isChecked} onChange={handleUserRole}></Switch>
                 <FaRegBell className="size-5" />
                 <Popover content={content} title="User Detail">
                   <Avatar className="size-20">U</Avatar>
@@ -87,16 +118,13 @@ export const Sidebar = () => {
               borderRadius: borderRadiusLG,
             }}
           >
-            {items?.map((item)=>{
-                return <>
-                    {
-                        item.key === "1" && <> tasks </>
-                    }
-                    {/* {
-                        item.key === "2" && <> STATUS </>
-                    } */}
-                </>
-            })}
+            {!isChecked && selectedkey === "1" && <TaskList/> } 
+            {!isChecked && selectedkey === "2" && <TaskStatus/> } 
+            {isChecked && selectedkey === "1" && <UserList/> } 
+            {isChecked && selectedkey === "2" && <AssignTask/> } 
+
+          
+          
           </Content>
         </Layout>
       </Layout>

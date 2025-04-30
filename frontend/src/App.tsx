@@ -23,7 +23,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/signup" element={<SignupPage/>}/>
-        <Route path="/home" element={<HomePage/>}/>
+        <Route path="/" element={<HomePage/>}/>
       </Routes> 
     {/* <RouterProvider router={router}/> */}
     {/* <LoginPage /> */}
