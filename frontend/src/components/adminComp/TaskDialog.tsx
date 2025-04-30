@@ -10,11 +10,16 @@ import {
 
 } from "antd";
 import { Dayjs } from "dayjs";
-import {  useAtom, useSetAtom } from "jotai";
+import {  useSetAtom } from "jotai";
 
 import { taskAtom } from "../../atom/atomStore";
 
-export const TaskDialog = () => {
+type PropsType = { 
+  isModalOpen : boolean;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>; 
+}
+
+export const TaskDialog:React.FC<PropsType> = ({isModalOpen,setIsModalOpen}) => {
   type FieldType = {
     task: string;
     assignedto: string;
@@ -26,6 +31,7 @@ export const TaskDialog = () => {
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     console.log("Success:", values);
     setTask((prev) => [...prev, values]);
+    setIsModalOpen(false)
     
   };
 
@@ -47,6 +53,7 @@ export const TaskDialog = () => {
   };
 
   return (
+    
     <div>
       <Form
         name="basic"
