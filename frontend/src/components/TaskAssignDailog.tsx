@@ -15,11 +15,11 @@ interface TaskAssignDailogProps {
     email: string;
     key: number;
   };
+  isModalOpen: boolean;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const TaskAssignDailog: React.FC<TaskAssignDailogProps> = ({
-  record,
-}) => {
+export const TaskAssignDailog: React.FC<TaskAssignDailogProps> = ({record ,setIsModalOpen }) => {
   type FieldType = {
     task: string;
     assignedto: string;
@@ -30,7 +30,9 @@ export const TaskAssignDailog: React.FC<TaskAssignDailogProps> = ({
     let _values = {
       ...values,
       deadLine: values.deadLine.format("MM-DD-YYYY"),
+
     };
+    setIsModalOpen(false)
     console.log("Success:", _values);
   };
 

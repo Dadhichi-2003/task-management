@@ -1,4 +1,3 @@
-
 import {
   Button,
   DatePicker,
@@ -7,22 +6,27 @@ import {
   FormProps,
   Input,
   Select,
-
 } from "antd";
-import { Dayjs } from "dayjs";
-import {  useSetAtom } from "jotai";
+import dayjs, { Dayjs } from "dayjs";
+import { useSetAtom } from "jotai";
 
 import { taskAtom } from "../../atom/atomStore";
 
-type PropsType = { 
-  isModalOpen : boolean;
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>; 
-}
+type PropsType = {
+  isModalOpen: boolean;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-export const TaskDialog:React.FC<PropsType> = ({isModalOpen,setIsModalOpen}) => {
+export const TaskDialog: React.FC<PropsType> = ({
+  setIsModalOpen,
+}) => {
   type FieldType = {
-    task: string;
+    taskTitle: string;
+    taskDescription: string;
     assignedto: string;
+    task:string;
+    priority: string;
+    assignDate: Dayjs;
     deadLine: Dayjs;
   };
 
@@ -31,8 +35,7 @@ export const TaskDialog:React.FC<PropsType> = ({isModalOpen,setIsModalOpen}) => 
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     console.log("Success:", values);
     setTask((prev) => [...prev, values]);
-    setIsModalOpen(false)
-    
+    setIsModalOpen(false);
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
@@ -52,8 +55,11 @@ export const TaskDialog:React.FC<PropsType> = ({isModalOpen,setIsModalOpen}) => 
     console.log("search:", value);
   };
 
+  const currentDate = dayjs();
+const formattedDate = currentDate.format('DD-MM-YYYY'); // वर्ष-माह-तारीख प्रारूप
+console.log(formattedDate);
+
   return (
-    
     <div>
       <Form
         name="basic"
@@ -67,12 +73,20 @@ export const TaskDialog:React.FC<PropsType> = ({isModalOpen,setIsModalOpen}) => 
       >
         <div className="flex flex-col justify-start items-start">
           <Form.Item<FieldType>
-            label="Task Description"
-            name="task"
+            label="Task Title"
+            name="taskTitle"
             rules={[{ required: true, message: "please enter the task" }]}
           >
-            <Input placeholder="Enter task" />
+            <Input placeholder="Enter task title" />
           </Form.Item>
+          <Form.Item<FieldType>
+            label="Task Description"
+            name="taskDescription"
+            rules={[{ required: true, message: "please enter the task" }]}
+          >
+            <Input placeholder="Enter task Description" />
+          </Form.Item>
+
           <Form.Item<FieldType>
             label="Assigned to "
             name="assignedto"
@@ -107,6 +121,43 @@ export const TaskDialog:React.FC<PropsType> = ({isModalOpen,setIsModalOpen}) => 
                 },
               ]}
             />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Set Priority"
+            name="priority"
+            rules={[{ required: true, message: "please select priority" }]}
+          >
+            <Select
+              showSearch
+              placeholder="Select a Priority of task"
+              optionFilterProp="label"
+              onChange={onChange}
+              onSearch={onSearch}
+              options={[
+                {
+                  value: "Important",
+                  label: "Important",
+                },
+                {
+                  value: "Moderate",
+                  label: "Modearete",
+                },
+                {
+                  value: "Low",
+                  label: "Low",
+                },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Assigned Date"
+            name="assignDate"
+            initialValue={formattedDate}
+            rules={[{ required: true, message: "Give deadline of task" }]}
+          >
+            <Input placeholder="Enter task Description" />
           </Form.Item>
           <Form.Item<FieldType>
             label="Set Deadline"

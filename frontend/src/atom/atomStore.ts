@@ -2,8 +2,12 @@ import { atom } from "jotai";
 import { Dayjs } from "dayjs";
 
 export type TaskType = {
-  task: string;
+  taskTitle: string;
+  taskDescription: string;
   assignedto: string;
+  task:string;
+  priority: string;
+  assignDate: Dayjs;
   deadLine: Dayjs;
 };
 

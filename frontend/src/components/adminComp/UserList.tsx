@@ -1,5 +1,5 @@
-import { Button, Input, Popover, Space, Table, TableProps } from "antd";
-import React, { useState } from "react";
+import { Button, Input, Modal, Space, Table, TableProps } from "antd";
+import  { useState } from "react";
 import { TaskAssignDailog } from "../TaskAssignDailog";
 import { SearchOutlined } from "@ant-design/icons";
 
@@ -20,6 +20,14 @@ const usersData: userType[] = [
 
 export const UserList = () => {
   const [username, setUsername] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   const columns: TableProps<userType>["columns"] = [
     {
@@ -51,16 +59,20 @@ export const UserList = () => {
             Remove user
           </Button>{" "}
           <Space />
-          <Popover
-            content={<TaskAssignDailog record={record} />}
-            title="Assign Task"
-            trigger="click"
-          >
-            <Button variant="solid" color="primary">
+        
+            <Button variant="solid" color="primary" onClick={showModal} > 
               {" "}
               Assign task
             </Button>
-          </Popover>
+            <Modal
+              title="Basic Modal"
+              open={isModalOpen}
+              onCancel={handleCancel}
+              footer={[]}
+            >
+              <TaskAssignDailog record={record} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}  />
+            </Modal>
+          
         </>
       ),
     },
@@ -76,6 +88,7 @@ export const UserList = () => {
     // setUsers(updatedUser)
 
     // console.log(updatedUser);
+    
   };
 
   const [users, setUsers] = useState<userType[]>(usersData);

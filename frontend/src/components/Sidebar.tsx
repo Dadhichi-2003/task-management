@@ -2,19 +2,20 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Empty, Layout, Menu, Popover, Switch, theme } from "antd";
+import { Avatar, Button, Layout, Menu, Popover, Switch, theme } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
-import React, { useState } from "react";
+import  { useState } from "react";
 import { CgGoogleTasks } from "react-icons/cg";
 import { FaRegBell, FaTasks } from "react-icons/fa";
 import { SiGoogletasks } from "react-icons/si";
 import { TaskList } from "./userComp/TaskList";
 import { TaskStatus } from "./userComp/TaskStatus";
 import { PiUserListBold } from "react-icons/pi";
-import { LuListTodo } from "react-icons/lu";
+import { LuListTodo, LuPanelBottom } from "react-icons/lu";
 import { UserList } from "./adminComp/UserList";
 import { AssignTask } from "./adminComp/AssignTask";
+import { AdminPanel } from "./adminComp/AdminPanel";
 
 export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -26,7 +27,7 @@ export const Sidebar = () => {
 
   const content = (
     <div className="flex flex-col justify-center item-center gap-1">
-      <p> Hit patel</p>
+      <p> Hit patel</p> {/*  username and email */}
       <p> Hit12@gmail.com</p>
     </div>
   );
@@ -43,21 +44,28 @@ export const Sidebar = () => {
       icon: <CgGoogleTasks size={25} />,
       label: "Task Status",
     },
+   
   ]
   
 
   const adminItems = [
     {
       key:"1",
-      icon: <PiUserListBold size={22} />,
-      label : "User List",
+      icon: <LuPanelBottom size={25}/>,
+      label: "Admin Panel"
     },
-
     {
       key:"2",
       icon:<LuListTodo size={22}/>,
       label:"Assign Task"
-    }
+    },
+    {
+      key:"3",
+      icon: <PiUserListBold size={22} />,
+      label : "User List",
+    },
+
+   
   ]  
 
   
@@ -120,8 +128,10 @@ export const Sidebar = () => {
           >
             {!isChecked && selectedkey === "1" && <TaskList/> } 
             {!isChecked && selectedkey === "2" && <TaskStatus/> } 
-            {isChecked && selectedkey === "1" && <UserList/> } 
+            
+            {isChecked && selectedkey === "1" && <AdminPanel/> } 
             {isChecked && selectedkey === "2" && <AssignTask/> } 
+            {isChecked && selectedkey === "3" && <UserList/> } 
 
           
           
