@@ -1,16 +1,34 @@
 import { Button, Form, FormProps, Input } from "antd";
-
-import { Link } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../firebase/firebase";
+import axios from "axios";
+import { useEffect } from "react";
 
 export const SignupPage = () => {
   type FieldType = {
     username?: string;
-    email?: string;
-    password?: string;
+    email: string;
+    password: string;
   };
 
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    console.log("Success:", values);
+  const navigate = useNavigate();
+ 
+  const onFinish: FormProps<FieldType>["onFinish"] = async(values) => {
+    try {
+      const res = await axios.post('http://localhost:3000/api/user/signup', {
+        email:values.email,
+        password:values.password,  
+        username:values.username,
+      });
+
+      if (res.data.uid) {
+        alert('Signup successful');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (

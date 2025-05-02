@@ -1,18 +1,38 @@
 import { Button, Form, FormProps, Input } from "antd";
-
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 export const LoginPage = () => {
 
   const navigate = useNavigate();
   type FieldType = {
-    email?: string;
-    password?: string;
+    email: string;
+    password: string;
   };
 
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    console.log("Success:", values);
-    navigate('/home');
+  const onFinish: FormProps<FieldType>["onFinish"] = async(values) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth,values.email,values.password);
+
+      const idToken = await userCredential.user.getIdTokenResult(true);
+      const role = idToken.claims.role;
+      console.log("role",);
+      console.log("role",idToken.claims);
+      await axios.post("http://localhost:3000/api/user/login",{idToken:idToken.token});
+
+      if(role=== "admin"){
+        navigate("/assigntask");
+      }else{
+        navigate("/")
+      }
+      console.log("authUser",auth.currentUser);
+      toast.success("Login Successfully");
+    } catch (error:any) {
+      toast.error(error.message);
+    }
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (

@@ -3,7 +3,7 @@ import "./App.css";
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { HomePage } from "./pages/HomePage";
-
+import {ToastContainer} from "react-toastify";
 function App() {
   //  const router = createBrowserRouter([
   //   {
@@ -19,7 +19,7 @@ function App() {
     <>
    
     <div className="font-display h-screen">
-
+    <ToastContainer/>
       <Routes>
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/signup" element={<SignupPage/>}/>
