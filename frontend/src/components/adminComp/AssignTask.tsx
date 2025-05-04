@@ -30,7 +30,6 @@ type FieldType = {
 
 export const AssignTask = () => {
   const [taskData] = useAtom(taskAtom);
-  console.log(taskData);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);

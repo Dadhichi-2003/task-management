@@ -1,32 +1,92 @@
-import { Button, Input, Modal, Space, Table, TableProps } from "antd";
-import  { useState } from "react";
+import { Button, Input, Modal, Table, TableProps, Skeleton } from "antd";
+import { useEffect, useState } from "react";
 import { TaskAssignDailog } from "../TaskAssignDailog";
 import { SearchOutlined } from "@ant-design/icons";
+import { getAuth } from "firebase/auth";
+import axios from "axios";
 
 interface userType {
+  key: string;
   username: string;
   email: string;
-  key: number; // uid avse ahiya
-  // role : string  // role avse ema hiya roles field add krvani thse
 }
 
-const usersData: userType[] = [
-  { username: "hit_patel", email: "hit.patel@example.com", key: 1 },
-  { username: "sneha_kumar", email: "sneha.kumar@example.com", key: 2 },
-  { username: "ravi_shah", email: "ravi.shah@example.com", key: 3 },
-  { username: "anjali_mehta", email: "anjali.mehta@example.com", key: 4 },
-  { username: "amit_prajapati", email: "amit.prajapati@example.com", key: 5 },
-];
+interface EmployeeDocType {
+  id: string;
+  userData: {
+    username: string;
+    email: string;
+    role: string;
+  };
+}
 
 export const UserList = () => {
+  const [users, setUsers] = useState<userType[]>([]);
   const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<userType | null>(null);
+  const [loading, setLoading] = useState(false); 
 
-  const showModal = () => {
+  const showModal = (record: userType) => {
+    setSelectedRecord(record);
     setIsModalOpen(true);
   };
+
   const handleCancel = () => {
     setIsModalOpen(false);
+    setSelectedRecord(null);
+  };
+
+  const fetchUsers = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const idToken = await user?.getIdToken();
+
+    try {
+      setLoading(true); 
+      const response = await axios.get("http://localhost:3000/api/users/all", {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      const employees = response.data
+        .filter((emp: EmployeeDocType) => emp.userData.role !== "admin")
+        .map((emp: EmployeeDocType) => ({
+          key: emp.id,
+          username: emp.userData.username,
+          email: emp.userData.email,
+        }));
+
+      setUsers(employees);
+      console.log("Fetched users:", employees);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
+      setLoading(false);  
+    }
+  };
+
+  const removeUser = async (uid: string) => {
+    try {
+      const token = await getAuth().currentUser?.getIdToken();
+      const response = await axios.delete(`http://localhost:3000/api/users/remove/${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200) {
+        const updatedUsers = users.filter((user) => user.key !== uid);
+        setUsers(updatedUsers);
+      } else {
+        const errorData = await response.data;
+        console.error("Error deleting user:", errorData.message || errorData.error);
+      }
+    } catch (err) {
+      console.error("Failed to delete user:", err);
+    }
   };
 
   const columns: TableProps<userType>["columns"] = [
@@ -34,7 +94,6 @@ export const UserList = () => {
       title: "Username",
       dataIndex: "username",
       key: "username",
-
       sorter: (a, b) => a.username.localeCompare(b.username),
     },
     {
@@ -44,72 +103,64 @@ export const UserList = () => {
     },
     {
       title: "Action",
-      dataIndex: '"action',
       key: "action",
       render: (_, record) => (
         <>
-          {console.log(record.key)}
           <Button
-            variant="solid"
-            color="danger"
-            onClick={() => {
-              removeUser(record.key);
-            }}
+            danger
+            onClick={() => removeUser(record.key)}
+            style={{ marginRight: 8 }}
           >
             Remove user
-          </Button>{" "}
-          <Space />
-        
-            <Button variant="solid" color="primary" onClick={showModal} > 
-              {" "}
-              Assign task
-            </Button>
-            <Modal
-              title="Basic Modal"
-              open={isModalOpen}
-              onCancel={handleCancel}
-              footer={[]}
-            >
-              <TaskAssignDailog record={record} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}  />
-            </Modal>
-          
+          </Button>
+          <Button type="primary" onClick={() => showModal(record)}>
+            Assign task
+          </Button>
         </>
       ),
     },
   ];
 
-  const removeUser = (key: number) => {
-    const updatedUsers = users.filter((user) => user.key !== key);
-    setUsers(updatedUsers);
-
-    // users.splice(key-1,1);
-    // const updatedUser= users;
-
-    // setUsers(updatedUser)
-
-    // console.log(updatedUser);
-    
-  };
-
-  const [users, setUsers] = useState<userType[]>(usersData);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <>
       <Input
         type="text"
-        onChange={(e) => {
-          setUsername(e.target.value);
-        }}
+        onChange={(e) => setUsername(e.target.value)}
         placeholder="Find user"
         prefix={<SearchOutlined />}
         className="my-4"
-      ></Input>
-      <Table<userType>
-        dataSource={users.filter((user) =>
-          user.username.toLowerCase().includes(username.toLowerCase())
-        )}
-        columns={columns}
       />
+
+      {loading ? (
+        <Skeleton active paragraph={{ rows: 5 }} />
+      ) : (
+        <Table<userType>
+          dataSource={users.filter((user) =>
+            user.username.toLowerCase().includes(username.toLowerCase())
+          )}
+          columns={columns}
+          rowKey="key"
+        />
+      )}
+
+      {selectedRecord && (
+        <Modal
+          title="Assign Task"
+          open={isModalOpen}
+          onCancel={handleCancel}
+          footer={null}
+        >
+          <TaskAssignDailog
+            record={selectedRecord}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+          />
+        </Modal>
+      )}
     </>
   );
 };

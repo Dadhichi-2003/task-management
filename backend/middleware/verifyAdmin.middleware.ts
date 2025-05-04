@@ -1,25 +1,29 @@
-import { NextFunction } from "express"
 import { admin } from "../firebase/firebase.ts";
-import { Request,Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
+export const verifyAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200); // Allow preflight CORS requests
+  }
 
-export const verfiyAdmin = async(req:Request,res:Response,next:NextFunction)=>{
+  try {
     const token = req.headers['authorization']?.split(' ')[1];
-    if(!token){
-        res.status(401).json({
-            message:"token is missing or invalid"
-        })
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Token is missing or invalid"
+      });
     }
-    try {
-      const decoded = await admin.auth().verifyIdToken(token!);
-      if(decoded.role !== "admin"){
-        res.status(403).json({
-            message:"Access denied"
-        })
-      }
-    } catch (error:any) {
-        res.status(500).json({
-            error:error.message
-        })
-    }
-}
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    req.user = decodedToken;
+
+    next();
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Token verification failed",
+      error: error.message
+    });
+  }
+};

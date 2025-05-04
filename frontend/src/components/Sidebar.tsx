@@ -5,7 +5,7 @@ import {
 import { Avatar, Button, Layout, Menu, Popover, Switch, theme } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
-import  { useState } from "react";
+import  { useEffect, useState } from "react";
 import { CgGoogleTasks } from "react-icons/cg";
 import { FaRegBell, FaTasks } from "react-icons/fa";
 import { SiGoogletasks } from "react-icons/si";
@@ -16,19 +16,47 @@ import { LuListTodo, LuPanelBottom } from "react-icons/lu";
 import { UserList } from "./adminComp/UserList";
 import { AssignTask } from "./adminComp/AssignTask";
 import { AdminPanel } from "./adminComp/AdminPanel";
+import {  onAuthStateChanged, User } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase/firebase";
 
 export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedkey , setSelectedkey ] = useState("1");
-  const [isChecked , setIsChecked] = useState(false)
+  const [isChecked , setIsChecked] = useState(false);
+  const [user,setUser] = useState<User | null>(null);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    const unsub =  onAuthStateChanged(auth,(user)=>{
+      setUser(user);
+    })
+    return ()=> unsub();
+  },[user]);
+
+
+  const handleLogout = async()=>{
+    try {
+     await auth.signOut();
+     navigate("/login");
+    } catch (error) {
+      console.log("error",error);
+    }
+  }
+
   const content = (
     <div className="flex flex-col justify-center item-center gap-1">
-      <p> Hit patel</p> {/*  username and email */}
-      <p> Hit12@gmail.com</p>
+      <p>{user?.displayName}</p>
+      <p>{user?.email}</p>
+      <Button type="primary" danger size="small" onClick={handleLogout}>
+  Log Out
+</Button>
+
     </div>
   );
 

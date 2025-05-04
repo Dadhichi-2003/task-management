@@ -1,6 +1,5 @@
 import { Button, Table, TableProps } from "antd";
 import React, { useState } from "react";
-import { TaskStatus } from "./TaskStatus";
 
 export const TaskList = () => {
   
@@ -106,7 +105,6 @@ export const TaskList = () => {
   const inProgresstask = tasks.filter((task=> task.status === "In progress" ))
 
 
-  console.log(tasks);
 
    
   return (

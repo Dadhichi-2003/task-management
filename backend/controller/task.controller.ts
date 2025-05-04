@@ -1,11 +1,14 @@
-import { Request,Response } from "express"
-import { db,admin } from "../firebase/firebase.ts";
+import { Request, Response } from "express";
+import { db, admin } from "../firebase/firebase.ts";
 
 
 export const createTaskAndAssign = async (req: Request, res: Response) => {
-  const { title, taskDescription, assignedTo, priority, deadline } = req.body;
+  console.log("Received body:", req.body); 
 
-  if (!title || !taskDescription || !assignedTo || !priority || !deadline) {
+  const { taskTitle, taskDescription, assignedTo, priority, deadline, assignDate } = req.body;
+
+ 
+  if (!taskTitle || !taskDescription || !assignedTo || !priority || !deadline || !assignDate) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -13,18 +16,17 @@ export const createTaskAndAssign = async (req: Request, res: Response) => {
     const taskRef = db.collection("tasks").doc();
     const taskData = {
       id: taskRef.id,
-      title,
+      taskTitle,
       taskDescription,
       assignedTo,
       priority,
       deadline,
+      assignDate: assignDate.toISOString(), 
       createdAt: new Date().toISOString()
     };
 
-   
     await taskRef.set(taskData);
 
- 
     await db.collection('employees').doc(assignedTo).update({
       "userData.assignedTasks": admin.firestore.FieldValue.arrayUnion(taskData)
     });
@@ -40,35 +42,44 @@ export const createTaskAndAssign = async (req: Request, res: Response) => {
   }
 };
 
+export const updatetask = async (req: Request, res: Response) => {
+  const { taskId, empId, status } = req.body;
 
-export const updatetask = async(req:Request,res:Response)=>{
-    const {taskId,empId,status} = req.body;
-    try {
-     const employeeRef = db.collection("employees").doc(empId);
-     const employeeDoc = await employeeRef.get();
-     
-     if(!employeeDoc.exists){
-         res.status(403).json({
-             message:"Data is not available"
-            })
-        }
+  try {
+    const employeeRef = db.collection("employees").doc(empId);
+    const employeeDoc = await employeeRef.get();
 
-        const employeeData = employeeDoc.data();
-
-        const task = employeeData?.userData?.assignedTasks.find((t: any) => t.id === taskId);
-      
-
-     await employeeRef.update({
-        "userData.assignedTasks": admin.firestore.FieldValue.arrayRemove(task),
-        "userData.completedTasks": admin.firestore.FieldValue.arrayUnion({...task,status:status})
-     });
-
-     res.status(200).json({
-        message:"Task marked as completed"
-     })
-    } catch (error:any) {
-        res.status(500).json({
-            error:error.message
-        })
+    if (!employeeDoc.exists) {
+      return res.status(403).json({
+        message: "Data is not available"
+      });
     }
-}
+
+    const employeeData = employeeDoc.data();
+
+
+    const task = employeeData?.userData?.assignedTasks.find((t: any) => t.id === taskId);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found"
+      });
+    }
+
+    await employeeRef.update({
+      "userData.assignedTasks": admin.firestore.FieldValue.arrayRemove(task),
+      "userData.completedTasks": admin.firestore.FieldValue.arrayUnion({
+        ...task,
+        status: status
+      })
+    });
+
+    res.status(200).json({
+      message: "Task marked as completed"
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
+};
