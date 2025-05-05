@@ -21,7 +21,7 @@ export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedkey, setSelectedkey] = useState("1");
   const [isChecked, setIsChecked] = useState(false);
-  const [role, setRole] = useState<null | string>(null);
+  const [role, setRole] = useState<string | unknown>("");
   const [user, setUser] = useState<User | null>(null);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -38,10 +38,10 @@ export const Sidebar = () => {
 
   const fetchRole = async () => {
     const token = await auth.currentUser?.getIdTokenResult();
-    const role = token?.claims;
-    setRole(role!.role);
+    const role = token?.claims.role;
+    setRole(role);
     console.log("====================================");
-    console.log("role", role!.role);
+    console.log("role", role);
     console.log("====================================");
   };
 
