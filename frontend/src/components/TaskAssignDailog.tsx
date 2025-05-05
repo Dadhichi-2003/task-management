@@ -13,7 +13,7 @@ interface TaskAssignDailogProps {
   record: {
     username: string;
     email: string;
-    key: number;
+    key: string;
   };
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;

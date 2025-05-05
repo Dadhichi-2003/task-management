@@ -67,7 +67,7 @@ export const signup = async(req:Request,res:Response)=>{
 
 export const removeEmployee = async(req:Request,res:Response)=>{
   try {
-    const {uid} = req.params as unknown as UserPayloadType;
+    const {uid} = req.params;
     await admin.auth().deleteUser(uid!);
     await db.collection("employees").doc(uid!).delete();
     res.status(200).json({
