@@ -9,13 +9,19 @@ interface userType {
   key: string;
   username: string;
   email: string;
+  userData:{
+    username:string;
+    role:string;
+    tech:string;
+    assignedTasks:string[];
+    completedTasks:string[];
+    Tasks:string[];
+  }
 }
 
 interface EmployeeDocType {
   id: string;
   userData: {
-    username: string;
-    email: string;
     role: string;
   };
 }
@@ -41,31 +47,38 @@ export const UserList = () => {
     const auth = getAuth();
     const user = auth.currentUser;
     const idToken = await user?.getIdToken();
-
+  
     try {
-      setLoading(true); 
+      setLoading(true);
       const response = await axios.get("http://localhost:3000/api/users/all", {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
       });
-
+  
       const employees = response.data
         .filter((emp: EmployeeDocType) => emp.userData.role !== "admin")
-        .map((emp: EmployeeDocType) => ({
-          key: emp.id,
-          username: emp.userData.username,
-          email: emp.userData.email,
-        }));
-
+        .map((emp: any) => {
+          const { uid, ...filteredUserData } = emp.userData;
+  
+          return {
+            key: emp.id,
+            username: emp.userData.username,
+            email: emp.userData.email,
+            userData: {
+              ...filteredUserData, 
+            },
+          };
+        });
       setUsers(employees);
       console.log("Fetched users:", employees);
     } catch (error) {
       console.error("Failed to fetch users:", error);
     } finally {
-      setLoading(false);  
+      setLoading(false);
     }
   };
+  
 
   const removeUser = async (uid: string) => {
     try {
@@ -102,6 +115,21 @@ export const UserList = () => {
       key: "email",
     },
     {
+      title: "Tech",
+      dataIndex: ["userData", "tech"],
+      key: "tech",
+    },
+    {
+      title: "Assigned Tasks",
+      key: "assignedTasksCount",
+      render: (_, record) => record.userData.assignedTasks?.length ?? 0,
+    },
+    {
+      title: "Completed Tasks",
+      key: "role",
+      render:(_,record) => record.userData.completedTasks?.length ?? 0,
+    },
+    {
       title: "Action",
       key: "action",
       render: (_, record) => (
@@ -113,14 +141,11 @@ export const UserList = () => {
           >
             Remove user
           </Button>
-          <Button type="primary" onClick={() => showModal(record)}>
-            Assign task
-          </Button>
         </>
       ),
     },
   ];
-
+  
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -140,7 +165,7 @@ export const UserList = () => {
       ) : (
         <Table<userType>
           dataSource={users.filter((user) =>
-            user.username.toLowerCase().includes(username.toLowerCase())
+            user.userData.username.toLowerCase().includes(username.toLowerCase())
           )}
           columns={columns}
           rowKey="key"

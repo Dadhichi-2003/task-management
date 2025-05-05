@@ -13,15 +13,30 @@ export const createTaskAndAssign = async (req: Request, res: Response) => {
   }
 
   try {
+
+
+    const employeeDoc = await db.collection('employees').doc(assignedTo).get();
+    if(!employeeDoc.exists) {
+      return res.status(404).json({
+        message:"Employee not found"
+      })
+    }
+
+    const employeeData = employeeDoc.data();
+    const employeeName = employeeData?.userData.username;
+    console.log("employeename",employeeName);
+    
+
     const taskRef = db.collection("tasks").doc();
     const taskData = {
       id: taskRef.id,
       taskTitle,
       taskDescription,
       assignedTo,
+      assignedName:employeeName,
       priority,
       deadline,
-      assignDate: assignDate.toISOString(), 
+      assignDate,
       createdAt: new Date().toISOString()
     };
 
@@ -83,3 +98,37 @@ export const updatetask = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const getTasks = async(req:Request,res:Response)=>{
+  try {
+    const snapShot = await db.collection("tasks").get();
+    const tasks = snapShot.docs.map((doc)=>({
+      id:doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json({
+      message:"Task Fetched Successfully",
+      tasks
+    })
+  } catch (error:any) {
+    res.status(500).json({
+      error:error.message
+    })
+  }
+}
+
+export const deleteTask =async(req:Request,res:Response)=>{
+  try {
+    const {id} = req.params;
+    await db.collection('tasks').doc(id).delete();
+    res.status(200).json({
+      message:"Tasks Deleted"
+    })
+  } catch (error:any) {
+    res.status(500).json({
+      error:error.message
+    })
+  }
+}

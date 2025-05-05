@@ -5,6 +5,11 @@ import { SignupPage } from "./pages/SignupPage";
 import { HomePage } from "./pages/HomePage";
 import PrivateRoute from "./PrivateRoute/PrivateRoute";
 import { AuthInitializer } from "./components/AuthInitializer";
+import { TaskList } from "./components/userComp/TaskList";
+import { TaskStatus } from "./components/userComp/TaskStatus";
+import { AdminPanel } from "./components/adminComp/AdminPanel";
+import { AssignTask } from "./components/adminComp/AssignTask";
+import { UserList } from "./components/adminComp/UserList";
 
 function App() {
   //  const router = createBrowserRouter([
@@ -25,6 +30,11 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage/>}/>
         <Route path="/signup" element={<SignupPage/>}/>
+        <Route path="/todo" element={<TaskList/>}/>
+        <Route path="/task-status" element={<TaskStatus/>}/>
+        <Route path="/admin" element={<AdminPanel/>}/>
+        <Route path="/assign-task" element={<AssignTask/>}/>
+        <Route path="/userlist" element={<UserList/>}/>
         <Route
           path="/"
           element={
@@ -33,6 +43,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        
       </Routes> 
     {/* <RouterProvider router={router}/> */}
     {/* <LoginPage /> */}

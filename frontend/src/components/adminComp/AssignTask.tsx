@@ -9,30 +9,53 @@ import {
   TableColumnType,
   TableProps,
 } from "antd";
-import  { useRef, useState } from "react";
+import  { useEffect, useRef, useState } from "react";
 import { TaskDialog } from "./TaskDialog";
 import { useAtom } from "jotai";
-import { taskAtom } from "../../atom/atomStore";
+// import { taskAtom } from "../../atom/atomStore";
 import { Dayjs } from "dayjs";
 // import Highlighter from 'react-highlight-words'
 import { FilterDropdownProps } from "antd/es/table/interface";
 import { SearchOutlined } from "@ant-design/icons";
+import axios from "axios";
 
 type FieldType = {
+  key:string;
+  id:string;
   taskTitle: string;
   taskDescription: string;
-  assignedto: string;
+  assignedName: string;
   task: string;
   priority: string;
   assignDate: Dayjs;
-  deadLine: Dayjs;
+  deadline: Dayjs;
 };
 
 export const AssignTask = () => {
-  const [taskData] = useAtom(taskAtom);
+  // const [taskData] = useAtom(taskAtom);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
+  const [tasks,setTasks] = useState<FieldType[]>([]);
+  
+  useEffect(()=>{
+    const fetchTasks = async()=>{
+      try {
+        const res = await axios.get("http://localhost:3000/api/tasks/all");
+        const data = res.data;
+        console.log("tasks data",data);
+        const taskWithKeys = data.tasks.map((task:any)=>({
+          ...task,key:task.id
+        }))
+        setTasks(data.tasks)
+      } catch (error:any) {
+        console.log("error occured",error.message);
+        
+      }
+    }
+    fetchTasks();
+  },[])
+  
 
   const handleSearch = (
     selectedKeys: string[],
@@ -145,6 +168,20 @@ export const AssignTask = () => {
   });
 
 
+
+  const handlewithdrawClick = async(id:string)=>{
+    try {
+      await axios.delete(`http://localhost:3000/api/tasks/delete/${id}`);
+      const updatedTasks = tasks.filter((task)=> task.id !== id);
+      console.log("updatedtasks",updatedTasks);
+      
+      setTasks(updatedTasks);
+      console.log("Task deleted successfully");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
 const columns: TableProps<FieldType>["columns"] = [
   {
     title: "Task Title",
@@ -160,9 +197,9 @@ const columns: TableProps<FieldType>["columns"] = [
   },
   {
     title: "Assigned To",
-    dataIndex: "assignedto",
-    key: "assignedto",
-    ...getColumnSearchProps('assignedto'),
+    dataIndex: "assignedName",
+    key: "assignedName",
+    ...getColumnSearchProps('assignedName'),
   },
   {
     title: "Priority",
@@ -177,17 +214,17 @@ const columns: TableProps<FieldType>["columns"] = [
     // ...getColumnSearchProps('taskTitle'),
   },
   {
-    title: "DeadLine",
-    dataIndex: "deadLine",
-    key: "deadline",
-    render: (date: Dayjs) => date.format("DD-MM-YYYY"),
+    title: "Deadline",
+    dataIndex: "deadline",
+    key: "deadline"
+    // render: (date: Dayjs) => date.format("DD-MM-YYYY"),
   },
   {
     title: "Action",
     dataIndex: "action",
     key: "action",
-    render: (_, record) => (
-      <Button variant="solid" color="red">
+    render: (index, record) => (
+      <Button id={index} onClick={()=> handlewithdrawClick(record.id)} variant="solid"  color="red">
         withdraw task
       </Button>
     ),
@@ -223,7 +260,7 @@ const columns: TableProps<FieldType>["columns"] = [
       >
         <TaskDialog isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
       </Modal>
-      <Table<FieldType> columns={columns} dataSource={taskData}></Table>
+      <Table<FieldType> columns={columns} dataSource={tasks} ></Table>
     </div>
   );
 };

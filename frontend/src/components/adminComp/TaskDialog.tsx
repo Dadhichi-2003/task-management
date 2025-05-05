@@ -70,7 +70,7 @@ export const TaskDialog: React.FC<PropsType> = ({ setIsModalOpen }) => {
       taskDescription: values.taskDescription,
       assignedTo: values.assignedTo,
       priority: values.priority,
-      assignDate: values.assignDate.toISOString(), 
+      assignDate: values.assignDate, 
       deadline: values.deadline.toISOString(),
     };
     
@@ -157,7 +157,9 @@ export const TaskDialog: React.FC<PropsType> = ({ setIsModalOpen }) => {
         name="deadline"
         rules={[{ required: true, message: "Please select deadline" }]}
       >
-        <DatePicker format="DD-MM-YYYY" />
+        <DatePicker format="DD-MM-YYYY" disabledDate={(current)=>
+          current && current.isBefore(dayjs(),"day")
+        }/>
       </Form.Item>
 
       <Button type="primary" htmlType="submit">
